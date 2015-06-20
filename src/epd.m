@@ -1,4 +1,4 @@
-function [i_start, i_end] = epd(data)
+function [i_start, i_end, speech] = epd(data)
 %   end point detection
 %   data: row vector, 8000 point per second
 
@@ -45,6 +45,11 @@ maxsilence = 20;  % 8*10ms  = 80ms
 minlen  = 30;    % 15*10ms = 150ms  
 
 %   ¿ªÊ¼¼ì²â
+%   status
+% 0   ¾²Òô
+% 1   ÓïÒô³õÊ¼½×¶Î
+% 2   ÓïÒô
+% 3   ÓïÒô½áÊø½×¶Î
 x1 = 0;
 x2 = 0;
 count = 0;
@@ -132,10 +137,10 @@ subplot(312)
 plot(energy);  
 axis([1 length(energy) 0 max(energy)])  
 ylabel('Energy');  
-% for i = 1:size(result, 1)
-%     line([result(i, 1), result(i, 1)], [min(energy), max(energy)], 'Color', 'red');  
-%     line([result(i, 2), result(i, 2)], [min(energy), max(energy)], 'Color', 'red');
-% end
+for i = 1:size(result, 1)
+    line([result(i, 1), result(i, 1)], [min(energy), max(energy)], 'Color', 'red');  
+    line([result(i, 2), result(i, 2)], [min(energy), max(energy)], 'Color', 'red');
+end
 line([1 length(energy)], [energy1 ,energy1], 'Color', 'c');  
 line([1 length(energy)], [energy2 ,energy2], 'Color', 'green');  
 %   plot zcr
@@ -204,7 +209,13 @@ line([i_end * step_len + window_len, i_end * step_len + window_len], [-1, 1], 'C
 subplot(313);
 line([i_start, i_start], [min(zcr), max(zcr)], 'Color', 'black');  
 line([i_end, i_end], [min(zcr), max(zcr)], 'Color', 'black');
+subplot(313);
+i_start = round(i_start * step_len)
+i_end = round(i_end * step_len + window_len)
+speech = data(i_start:i_end);
+plot(speech);
 if batch_cnt > 1
+    %   visualize merge effect
     subplot(312);
     bar(par);
     u = input('continue...');
