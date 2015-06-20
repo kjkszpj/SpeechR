@@ -5,3 +5,4 @@ end
 data = data ./ max(data);
 re = audioplayer(data,8000);
 re.play;
+plot(data);

@@ -3,6 +3,9 @@ function [i_start, i_end] = epd(data)
 %   data: row vector, 8000 point per second
 
 %   get rid of hardware issue(see ypj & wqf for example)
+if (sum(data) == 0)
+    return
+end
 if max(data(1, 1:2000)) > 0.7
 	data(1, 1:2700) = data(1, 31001-2700:31000);
 end
@@ -17,12 +20,12 @@ energy = enframe(t, hamming(window_len,'periodic'), step_len);
 energy = sum(energy, 2);
 
 %   zero cross rate(ZCR)
-eps = 0.01;
-tmp1  = enframe(data(1:end-1), hamming(window_len,'periodic'), step_len);
-tmp2  = enframe(data(2:end), hamming(window_len,'periodic'), step_len);
-signs = (tmp1.*tmp2)<0;
-diffs = (tmp1 -tmp2)>eps;
-zcr   = sum(signs.*diffs, 2);  
+eps = 0.02;
+tmp1 = enframe(data(1 : end - 1), hamming(window_len,'periodic'), step_len);
+tmp2 = enframe(data(2 : end), hamming(window_len,'periodic'), step_len);
+signs = (tmp1 .* tmp2) < 0;
+diffs = (tmp1 - tmp2) > eps;
+zcr = sum(signs .* diffs, 2);  
 
 %   energy / zcr
 mvz = energy ./ zcr;
@@ -31,11 +34,15 @@ mvz = energy ./ zcr;
 %   设置两个门限
 energy1 = 0.2 * max(energy);%初始短时能量高门限  
 energy2 = 0.23 * energy1;%初始短时能量低门限  
-zcr1 = 0.2 * max(zcr);%初始短时过零率高门限  
+if max(zcr(1:5)) > 0.2 * max(zcr)
+    zcr1 = 0.3 * max(zcr);%初始短时过零率高门限  
+else
+    zcr1 = 0.17 * max(zcr);
+end
 zcr2 = 0.23 * zcr1;%初始短时过零率低门限  
 %   设置静音长度和语音长度
-maxsilence = 15;  % 8*10ms  = 80ms  
-minlen  = 20;    % 15*10ms = 150ms  
+maxsilence = 20;  % 8*10ms  = 80ms  
+minlen  = 30;    % 15*10ms = 150ms  
 
 %   开始检测
 x1 = 0;
@@ -44,6 +51,7 @@ count = 0;
 silence = 0;
 status = 0;
 result = [];
+cnt_reset = 0;
 for i = 1:1:length(zcr)
     switch status
         case {0, 1}
@@ -65,11 +73,12 @@ for i = 1:1:length(zcr)
                 silence = 0;
             end
             if energy(i) > energy2 || zcr(i) > zcr2
-                if (silence < 3)
+                if (cnt_reset < 3)
                     silence = 0;
                 end
                 count = count + 1;
             else
+                cnt_reset  = cnt_reset + 1;
                 silence = silence + 1;
                 if (silence < maxsilence)
                     count = count + 1;
@@ -85,8 +94,8 @@ for i = 1:1:length(zcr)
             end
             continue
         case {3}
-            count = count-silence/2; 
-            x2 = x1 + count -1;  
+            count = count - silence / 1.618; 
+            x2 = min(x1 + count - 1, length(energy));
             x1 = max(x1 - 5, 1);
             result = [result; x1, x2];
             x1 = 0;
@@ -94,11 +103,12 @@ for i = 1:1:length(zcr)
             count = 0;
             silence = 0;
             status = 0;
+            cnt_reset = 0;
     end
 end
 if (status == 2 || status == 3)
-    count = count-silence/2; 
-    x2 = x1 + count -1;  
+    count = count - silence / 2; 
+    x2 = min(x1 + count - 1, length(energy));
     x1 = max(x1 - 5, 1);
     result = [result; x1, x2];
     x1 = 0;
@@ -117,7 +127,6 @@ for i = 1:size(result, 1)
     line([result(i, 1) * step_len, result(i, 1) * step_len], [-1, 1], 'Color', 'red');  
     line([result(i, 2) * step_len + window_len, result(i, 2) * step_len + window_len], [-1, 1], 'Color', 'red');
 end
-
 %   plot energy
 subplot(312)     
 plot(energy);  
@@ -129,7 +138,6 @@ for i = 1:size(result, 1)
 end
 line([1 length(energy)], [energy1 ,energy1], 'Color', 'c');  
 line([1 length(energy)], [energy2 ,energy2], 'Color', 'green');  
-
 %   plot zcr
 subplot(313)  
 plot(zcr);  
@@ -141,5 +149,54 @@ for i = 1:size(result, 1)
 end
 line([1 length(zcr)], [zcr1 ,zcr1], 'Color', 'c');  
 line([1 length(zcr)], [zcr2 ,zcr2], 'Color', 'green');   
-result
+
+%   prepare to merge
+batch_cnt = size(result, 1);
+par = zeros(1, batch_cnt);
+for i = 1:1:batch_cnt
+    x1 = result(i, 1);
+    x2 = result(i, 2);
+    par(1, i) = sum(energy(x1 : x2)) + sum(zcr(x1 : x2));
+end
+par = par ./ sum(par);
+[u, index] = max(par);
+i_start = result(index, 1);
+i_end = result(index, 2);
+i = index - 1;
+while i >= 1
+    if par(1, i) >= 0.12
+        i_start = min(i_start, result(i, 1));
+        i = i - 1;
+    elseif par(1, i) >= 0.08
+        if (i_end - min(i_start, result(i, 1)) > 150)
+            break
+        end
+        i_start = min(i_start, result(i, 1));
+        i = i - 1;
+    else
+        break;
+    end
+end 
+i = index + 1;
+while i <= batch_cnt
+    if par(1, i) >= 0.12
+        i_end = max(i_end, result(i, 2));
+        i = i + 1;
+    elseif par(1, i) >= 0.08
+        if (max(i_end, result(i, 2)) - i_start > 150)
+            break
+        end
+        i_end = max(i_end, result(i, 2));
+        i = i + 1;
+    else
+        break;
+    end
+end
+line([i_start, i_start], [min(zcr), max(zcr)], 'Color', 'black');  
+line([i_end, i_end], [min(zcr), max(zcr)], 'Color', 'black');
+if batch_cnt > 1
+    subplot(312);
+    bar(par);
+    u = input('continue...');
+end
 end
