@@ -123,19 +123,19 @@ subplot(311)    %subplot(3,1,1)±íÊ¾½«Í¼ÅÅ³É3ÐÐ1ÁÐ£¬×îºóµÄÒ»¸ö1±íÊ¾ÏÂÃæÒª»­µÚ1·ùÍ
 plot(data)  
 axis([1 length(data) -1 1])    %º¯ÊýÖÐµÄËÄ¸ö²ÎÊý·Ö±ð±íÊ¾xmin,xmax,ymin,ymax£¬¼´ÖáµÄ·¶Î§  
 ylabel('Speech');  
-for i = 1:size(result, 1)
-    line([result(i, 1) * step_len, result(i, 1) * step_len], [-1, 1], 'Color', 'red');  
-    line([result(i, 2) * step_len + window_len, result(i, 2) * step_len + window_len], [-1, 1], 'Color', 'red');
-end
+% for i = 1:size(result, 1)
+%     line([result(i, 1) * step_len, result(i, 1) * step_len], [-1, 1], 'Color', 'red');  
+%     line([result(i, 2) * step_len + window_len, result(i, 2) * step_len + window_len], [-1, 1], 'Color', 'red');
+% end
 %   plot energy
 subplot(312)     
 plot(energy);  
 axis([1 length(energy) 0 max(energy)])  
 ylabel('Energy');  
-for i = 1:size(result, 1)
-    line([result(i, 1), result(i, 1)], [min(energy), max(energy)], 'Color', 'red');  
-    line([result(i, 2), result(i, 2)], [min(energy), max(energy)], 'Color', 'red');
-end
+% for i = 1:size(result, 1)
+%     line([result(i, 1), result(i, 1)], [min(energy), max(energy)], 'Color', 'red');  
+%     line([result(i, 2), result(i, 2)], [min(energy), max(energy)], 'Color', 'red');
+% end
 line([1 length(energy)], [energy1 ,energy1], 'Color', 'c');  
 line([1 length(energy)], [energy2 ,energy2], 'Color', 'green');  
 %   plot zcr
@@ -143,14 +143,14 @@ subplot(313)
 plot(zcr);  
 axis([1 length(zcr) 0 max(zcr)])  
 ylabel('ZCR');  
-for i = 1:size(result, 1)
-    line([result(i, 1), result(i, 1)], [min(zcr), max(zcr)], 'Color', 'red');  
-    line([result(i, 2), result(i, 2)], [min(zcr), max(zcr)], 'Color', 'red');
-end
+% for i = 1:size(result, 1)
+%     line([result(i, 1), result(i, 1)], [min(zcr), max(zcr)], 'Color', 'red');  
+%     line([result(i, 2), result(i, 2)], [min(zcr), max(zcr)], 'Color', 'red');
+% end
 line([1 length(zcr)], [zcr1 ,zcr1], 'Color', 'c');  
 line([1 length(zcr)], [zcr2 ,zcr2], 'Color', 'green');   
 
-%   prepare to merge
+%   ¼ÆËã±ÈÀý
 batch_cnt = size(result, 1);
 par = zeros(1, batch_cnt);
 for i = 1:1:batch_cnt
@@ -160,14 +160,18 @@ for i = 1:1:batch_cnt
 end
 par = par ./ sum(par);
 [u, index] = max(par);
+
+%   ¿ªÊ¼ºÏ²¢Çø¼ä
 i_start = result(index, 1);
 i_end = result(index, 2);
 i = index - 1;
 while i >= 1
     if par(1, i) >= 0.12
+        %   force merge
         i_start = min(i_start, result(i, 1));
         i = i - 1;
     elseif par(1, i) >= 0.08
+        %   doubt merge
         if (i_end - min(i_start, result(i, 1)) > 150)
             break
         end
@@ -180,9 +184,11 @@ end
 i = index + 1;
 while i <= batch_cnt
     if par(1, i) >= 0.12
+        %   force merge
         i_end = max(i_end, result(i, 2));
         i = i + 1;
     elseif par(1, i) >= 0.08
+        %   doubt merge
         if (max(i_end, result(i, 2)) - i_start > 150)
             break
         end
@@ -192,6 +198,10 @@ while i <= batch_cnt
         break;
     end
 end
+subplot(311);
+line([i_start * step_len, i_start * step_len], [-1, 1], 'Color', 'black');  
+line([i_end * step_len + window_len, i_end * step_len + window_len], [-1, 1], 'Color', 'black');
+subplot(313);
 line([i_start, i_start], [min(zcr), max(zcr)], 'Color', 'black');  
 line([i_end, i_end], [min(zcr), max(zcr)], 'Color', 'black');
 if batch_cnt > 1
