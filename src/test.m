@@ -1,9 +1,9 @@
 addpath 'C:\Users\You\Documents\GitHub\SpeechR\src\lib\voicebox';
-
-for i = 1:1:400
+result = [];
+for i = 1:1:3200
     i
-    y = x.total(i, 3:end);
+    y = x.data(i, 4:end);
     % audio_player
-    epd(y);
-    pause(0.2);
+    [st, fi] = epd(y);
+    result = [result; st, fi];
 end
