@@ -9,7 +9,7 @@ if (nargin < 2)
 end
 % dimension of MFCC
 if (nargin < 3)
-    l = 14;
+    l = 16;
 end
 % demo or not
 if (nargin < 4)
@@ -73,13 +73,13 @@ for i = 1:l
     dctm(:, i) = dctm(:, i) * (i * 1);
 end
 dctm = cos(dctm * pi / m);
-mfcc = y * dctm;
+result = y * dctm;
 
-if demo
-    for i = 1:size(mfcc, 1)
-        plot(mfcc(i, :));
-        axis([1 l -20 50]);
-        pause(0.3);
-    end
-end
+% if demo
+%     for i = 1:size(mfcc, 1)
+%         plot(mfcc(i, :));
+%         axis([1 l -20 50]);
+%         pause(0.3);
+%     end
+% end
 end
