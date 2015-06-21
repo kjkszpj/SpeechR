@@ -2,7 +2,7 @@ function [i_start, i_end, speech] = epd(data, demo)
 %   end point detection
 %   data: row vector, 8000 point per second
 if nargin < 2
-    demo = true;
+    demo = false;
 end
 i_start = 0;
 i_end = 0;
@@ -20,13 +20,13 @@ step_len = 80;      %´°ÒÆ¶¯¾àÀë
 
 %   short term energy
 t = data .* data;
-energy = enframe(t, hamming(window_len,'periodic'), step_len);
+energy = enframe(t, hamming(window_len, 'periodic'), step_len);
 energy = sum(energy, 2);
 
 %   zero cross rate(ZCR)
 eps = 0.02;
-tmp1 = enframe(data(1 : end - 1), hamming(window_len,'periodic'), step_len);
-tmp2 = enframe(data(2 : end), hamming(window_len,'periodic'), step_len);
+tmp1 = enframe(data(1 : end - 1), hamming(window_len, 'periodic'), step_len);
+tmp2 = enframe(data(2 : end), hamming(window_len, 'periodic'), step_len);
 signs = (tmp1 .* tmp2) < 0;
 diffs = (tmp1 - tmp2) > eps;
 zcr = sum(signs .* diffs, 2);  
