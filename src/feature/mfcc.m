@@ -70,7 +70,7 @@ for i = 1:m
     dctm(i, :) = dctm(i, :) * (i - 0.5);
 end
 for i = 1:l
-    dctm(:, i) = dctm(:, i) * (i * 1);
+    dctm(:, i) = dctm(:, i) * i;
 end
 dctm = cos(dctm * pi / m);
 result = y * dctm;
