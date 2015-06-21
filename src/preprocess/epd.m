@@ -1,10 +1,12 @@
-function [i_start, i_end, speech] = epd(data)
-i_start = 0;
-i_end = 0;
+function [i_start, i_end, speech] = epd(data, demo)
 %   end point detection
 %   data: row vector, 8000 point per second
-
-%   get rid of hardware issue(see ypj & wqf for example)
+if nargin < 2
+    demo = true;
+end
+i_start = 0;
+i_end = 0;
+data = normalize_data(data);
 if (sum(data) == 0)
     return
 end
@@ -127,38 +129,41 @@ if (status == 2 || status == 3)
     silence = 0;
     status = 0;
 end
-% %   开始plot
-% %   plot origin speech
-% subplot(311)    %subplot(3,1,1)表示将图排成3行1列，最后的一个1表示下面要画第1幅图  
-% plot(data)  
-% axis([1 length(data) -1 1])    %函数中的四个参数分别表示xmin,xmax,ymin,ymax，即轴的范围  
-% ylabel('Speech');  
-% % for i = 1:size(result, 1)
-% %     line([result(i, 1) * step_len, result(i, 1) * step_len], [-1, 1], 'Color', 'red');  
-% %     line([result(i, 2) * step_len + window_len, result(i, 2) * step_len + window_len], [-1, 1], 'Color', 'red');
-% % end
-% %   plot energy
-% subplot(312)     
-% plot(energy);  
-% axis([1 length(energy) 0 max(energy)])  
-% ylabel('Energy');  
-% for i = 1:size(result, 1)
-%     line([result(i, 1), result(i, 1)], [min(energy), max(energy)], 'Color', 'red');  
-%     line([result(i, 2), result(i, 2)], [min(energy), max(energy)], 'Color', 'red');
-% end
-% line([1 length(energy)], [energy1 ,energy1], 'Color', 'c');  
-% line([1 length(energy)], [energy2 ,energy2], 'Color', 'green');  
-% %   plot zcr
-% subplot(313)  
-% plot(zcr);  
-% axis([1 length(zcr) 0 max(zcr)])  
-% ylabel('ZCR');  
-% % for i = 1:size(result, 1)
-% %     line([result(i, 1), result(i, 1)], [min(zcr), max(zcr)], 'Color', 'red');  
-% %     line([result(i, 2), result(i, 2)], [min(zcr), max(zcr)], 'Color', 'red');
-% % end
-% line([1 length(zcr)], [zcr1 ,zcr1], 'Color', 'c');  
-% line([1 length(zcr)], [zcr2 ,zcr2], 'Color', 'green');   
+
+if (demo)
+    %   开始plot
+    %   plot origin speech
+    subplot(311)    %subplot(3,1,1)表示将图排成3行1列，最后的一个1表示下面要画第1幅图  
+    plot(data)  
+    axis([1 length(data) -1 1])    %函数中的四个参数分别表示xmin,xmax,ymin,ymax，即轴的范围  
+    ylabel('Speech');  
+    % for i = 1:size(result, 1)
+    %     line([result(i, 1) * step_len, result(i, 1) * step_len], [-1, 1], 'Color', 'red');  
+    %     line([result(i, 2) * step_len + window_len, result(i, 2) * step_len + window_len], [-1, 1], 'Color', 'red');
+    % end
+    %   plot energy
+    subplot(312)     
+    plot(energy);  
+    axis([1 length(energy) 0 max(energy)])  
+    ylabel('Energy');  
+    for i = 1:size(result, 1)
+        line([result(i, 1), result(i, 1)], [min(energy), max(energy)], 'Color', 'red');  
+        line([result(i, 2), result(i, 2)], [min(energy), max(energy)], 'Color', 'red');
+    end
+    line([1 length(energy)], [energy1 ,energy1], 'Color', 'c');  
+    line([1 length(energy)], [energy2 ,energy2], 'Color', 'green');  
+    %   plot zcr
+    subplot(313)  
+    plot(zcr);  
+    axis([1 length(zcr) 0 max(zcr)])  
+    ylabel('ZCR');  
+    % for i = 1:size(result, 1)
+    %     line([result(i, 1), result(i, 1)], [min(zcr), max(zcr)], 'Color', 'red');  
+    %     line([result(i, 2), result(i, 2)], [min(zcr), max(zcr)], 'Color', 'red');
+    % end
+    line([1 length(zcr)], [zcr1 ,zcr1], 'Color', 'c');  
+    line([1 length(zcr)], [zcr2 ,zcr2], 'Color', 'green');   
+end
 
 %   计算比例
 batch_cnt = size(result, 1);
@@ -211,21 +216,25 @@ while i <= batch_cnt
         break;
     end
 end
-% subplot(311);
-% line([i_start * step_len, i_start * step_len], [-1, 1], 'Color', 'black');  
-% line([i_end * step_len + window_len, i_end * step_len + window_len], [-1, 1], 'Color', 'black');
-% subplot(313);
-% line([i_start, i_start], [min(zcr), max(zcr)], 'Color', 'black');  
-% line([i_end, i_end], [min(zcr), max(zcr)], 'Color', 'black');
-% subplot(313);
+if (demo)    
+    subplot(311);
+    line([i_start * step_len, i_start * step_len], [-1, 1], 'Color', 'black');  
+    line([i_end * step_len + window_len, i_end * step_len + window_len], [-1, 1], 'Color', 'black');
+    subplot(313);
+    line([i_start, i_start], [min(zcr), max(zcr)], 'Color', 'black');  
+    line([i_end, i_end], [min(zcr), max(zcr)], 'Color', 'black');
+    subplot(313);
+end
 i_start = max(round(i_start * step_len), 1);
 i_end = min(round(i_end * step_len + window_len), length(data));
 speech = data(i_start:i_end);
-% plot(speech);
-% if batch_cnt > 1
-%     %   visualize merge effect
-%     subplot(312);
-%     bar(par);
-%     u = input('continue...');
-% end
+if (demo)
+    plot(speech);
+    if batch_cnt > 1
+        %   visualize merge effect
+        subplot(312);
+        bar(par);
+        u = input('continue...');
+    end
+end
 end
