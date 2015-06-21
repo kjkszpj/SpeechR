@@ -12,5 +12,5 @@ x = getaudiodata(ar);
 plot(x);
 ar.play;
 %save data. And you should rename filename everytime!!
-save('data/bj_20.mat','x');
-x = max(x) - x + 100;
+save('new.mat','x');
+y = x';

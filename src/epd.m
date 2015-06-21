@@ -30,6 +30,9 @@ diffs = (tmp1 - tmp2) > eps;
 zcr = sum(signs .* diffs, 2);  
 
 %   energy / zcr
+if length(zcr) < length(energy)
+    zcr = [zcr; 0];
+end
 mvz = energy ./ zcr;
 
 %   ÉèÖÃ²ÎÊý
