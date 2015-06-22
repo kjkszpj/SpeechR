@@ -1,4 +1,4 @@
-function [i_start, i_end, speech] = epd(data, demo)
+function [i_start, i_end, speech, normal] = epd(data, demo)
 %   end point detection
 %   data: row vector, 8000 point per second
 if nargin < 2
@@ -6,8 +6,10 @@ if nargin < 2
 end
 i_start = 0;
 i_end = 0;
+speech = [0];
+normal = true;
 data = normalize_data(data);
-if (sum(data) == 0)
+if (sum(data) == 0 || isnan(data(1)))
     return
 end
 if max(data(1, 1:2000)) > 0.7
@@ -228,6 +230,18 @@ end
 i_start = max(round(i_start * step_len), 1);
 i_end = min(round(i_end * step_len + window_len), length(data));
 speech = data(i_start:i_end);
+% if (i_start < 2000 || i_end > 32000-2000 || i_end - i_start > 18000)
+%     i_start
+%     i_end
+%     i_end - i_start
+%     i_start = input('i_start')
+%     i_end = input('i_end')
+%     subplot(311);
+%     line([i_start, i_start], [-1, 1], 'Color', 'blue');  
+%     line([i_end, i_end], [-1, 1], 'Color', 'blue');
+%     normal = false;
+%     input('continue...');
+% end
 if (demo)
     plot(speech);
     if batch_cnt > 1

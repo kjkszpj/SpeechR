@@ -6,4 +6,10 @@ function result = normalize_data(data)
         result(1, 1:2700) = result(1, 31001-2700:31000);
     end
     result = result / max(abs(result));  
+%     eps = 0.0222;
+%     for i = 1:length(result)
+%         if abs(result(i)) < eps
+%             result(i) = 0;
+%         end
+%     end
 end
