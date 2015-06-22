@@ -4,9 +4,9 @@ function [i_start, i_end, speech, normal] = epd(data, demo)
 if nargin < 2
     demo = false;
 end
-i_start = 0;
-i_end = 0;
-speech = [0];
+i_start = 1;
+i_end = 1;
+speech = zeros(1, 3200);
 normal = true;
 data = normalize_data(data);
 if (sum(data) == 0 || isnan(data(1)))
