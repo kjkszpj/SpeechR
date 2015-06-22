@@ -1,6 +1,8 @@
 function result = mfcc(x, m, l, demo)
 %   MFCC
 %   procedure: normalize-->enframe-->STFT(FFT)-->mel_filtering-->IDCT
+%   x is a VOICE(after end point detection)
+%   will return matrix, size: batch * l
 
 % fill the parameter
 % number of mel filter
@@ -13,28 +15,26 @@ if (nargin < 3)
 end
 % demo or not
 if (nargin < 4)
-    demo = true;
+    demo = false;
 end
 
 % normalize & enframe
-x = normalize_data(x);
-[u, u, x] = epd(x);
 %   TODO, window size? 20ms-40ms
 window_len = 240;
 step_len = 80;
 x = enframe(x, hamming(window_len, 'periodic'), step_len);
 
 % FFT & energy spectrum
-cnt_fft = 2^nextpow2(size(x, 2));
+cnt_fft = 2 ^ nextpow2(size(x, 2));
 x = fft(x, cnt_fft, 2);
 x = abs(x);
 x = x .* x;
 % x = x(:, 1:cnt_fft / 2);
 % plot
-f = 8000*linspace(0,1,cnt_fft);
+f = 8000 * linspace(0, 1, cnt_fft);
 
 if demo 
-    plot(f, 2*abs(x(1, :)));
+    plot(f, 2 * abs(x(1, :)));
 end
 
 % mel filtering
