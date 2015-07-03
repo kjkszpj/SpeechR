@@ -1,5 +1,6 @@
 %   mine
 addpath 'C:\Users\You\Documents\GitHub\SpeechR\src\feature';
+addpath 'C:\Users\You\Documents\GitHub\SpeechR\src\final';
 addpath 'C:\Users\You\Documents\GitHub\SpeechR\src\learning';
 addpath 'C:\Users\You\Documents\GitHub\SpeechR\src\preprocess';
 addpath 'C:\Users\You\Documents\GitHub\SpeechR\src\tools';

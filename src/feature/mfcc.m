@@ -61,7 +61,7 @@ end
 size(x);
 size(fil);
 y = log(x * fil);
-size(y)
+size(y);
 
 % IDFT
 % TODO question here!!!
