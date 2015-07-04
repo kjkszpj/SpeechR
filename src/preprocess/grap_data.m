@@ -7,10 +7,10 @@ for k = 1:1:20
     fprintf('now working on %s\n', word);
     for i = 0:1:20
         id = num2str(i);
-        while (size(id, 2) < 2)
-        	id = ['0', id];
-        end
-        inf_name = ['E:\Dataset\data_4_lzj\', word, '\', word '_', id, '.mat'];
+%         while (size(id, 2) < 2)
+%         	id = ['0', id];
+%         end
+        inf_name = ['E:\Dataset\data_11_south\', word '_', id, '.mat'];
         fprintf('now fetching file name %s...\n', inf_name);
         try
             load(inf_name);
@@ -30,4 +30,4 @@ for k = 1:1:20
 end
 size(total)
 n = input('continue...');
-save('../data/data_4_lzj.mat', 'total')
+save('../data/data_11_south.mat', 'total')

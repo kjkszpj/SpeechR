@@ -1,5 +1,5 @@
 function [train_label, test_label] = data_split(index)
-train_label = 1:2800;
+train_label = [1:400, 801:3200];
 test_label = [];
 for i = 1:3200
     if sum(train_label == i) == 0

@@ -11,7 +11,7 @@ if nargin < 4
     m = 20;
 end
 if nargin < 5
-    demo = true;
+    demo = false;
 end
 
 result = zeros(d * l, 1);
