@@ -26,6 +26,7 @@ clc
 load('../data/feature_n.mat');
 load('../data/label.mat');
 tfeature = PCA(feature')';
+tfeature = tfeature(:, [1:end]);
 size(tfeature)
 result = [];
 index = randperm(size(label, 1));
@@ -36,10 +37,10 @@ for i = 10:5:100
     %   drop the 2nd pc(person related)
     train_feature = feature(train_index, [1:end]);
     test_feature =  feature(test_index, [1:end]);
-%     hold on
-%     plot3(train_feature(:, 1), train_feature(:, 2), train_feature(:, 3), 'b.');
-%     plot3(test_feature(:, 1), test_feature(:, 2), test_feature(:, 3), 'r*');
-%     input('continue...');
+    hold on
+    plot3(train_feature(:, 1), train_feature(:, 3), train_feature(:, 4), 'b.');
+    plot3(test_feature(:, 1), test_feature(:, 3), test_feature(:, 4), 'ro');
+    input('continue...');
     train_label = label(train_index, :);
     test_label = label(test_index, :);
     model = libsvmtrain(train_label * 1.0, train_feature, '-s 0 -c 0.01 -t 0 -m 64');

@@ -51,14 +51,16 @@ feature = gen_feature([x; data], ep, train_label, test_label);
 save('gogo.mat', 'feature');
 % feature = load('gogo.mat');
 % feature = feature.feature;
-feature = feature(:, 1:dim);
+tfeature = feature;
+result = [];
+feature = tfeature(:, 1:dim);
 size(feature)
 test_feature = feature(test_label, :);
 train_feature = feature(train_label, :);
 
 plot3(train_feature(:, 1), train_feature(:, 2), train_feature(:, 3), 'b.');
 hold on
-plot3(test_feature(:, 1), test_feature(:, 2), test_feature(:, 3), 'r.');
+plot3(test_feature(:, 1), test_feature(:, 2), test_feature(:, 3), 'ro');
 
 model = libsvmtrain(label(train_label), train_feature, '-s 0 -c 0.01 -t 0 -m 64');
 % load('model.mat');
