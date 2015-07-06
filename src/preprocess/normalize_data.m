@@ -2,7 +2,7 @@ function result = normalize_data(data)
 %   get rid of hardware issue(see ypj & wqf for example)
 result = data;
 for i = 1:size(data, 1)
-    if mod(i, 100) == 0
+    if mod(i, 500) == 6
         fprintf('....%d\n', i);
     end
     if max(result(i, 1:2000)) > 0.7

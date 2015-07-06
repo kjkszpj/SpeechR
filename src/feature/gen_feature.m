@@ -7,7 +7,7 @@ n = size(data, 1);
 total = [];
 f_mfcc = [];
 for i = 1:n
-    if mod(i, 100) == 0
+    if mod(i, 500) == 6
         fprintf('\t%d\n', i);
     end
     feature = [];
